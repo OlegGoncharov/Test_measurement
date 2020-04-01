@@ -29,7 +29,7 @@ print("Connection Success")
 
 
 
-end_loop_read = 20000
+end_loop_read = 3000
 
 
 
@@ -62,42 +62,32 @@ print("AOA Paramas Set")
 rtlsUtil.aoa_start(cte_length=20, cte_interval=1)
 print("AOA Started")
 
-angle_arr_1 = []
-rssi_arr_1 = []
-
- 
-
-
-i = 0
 i_1 = 0
-i_1_list = list()
-angle_arr1__to_mat = list()
-rssi_arr_1_to_mat = list()
+i_chan = 0
+i_chan_list = list()
+angle_arr_1= list()
+rssi_arr_1 = list()
 channel1_list = list()
 
 fig= plt.figure()
-while i<=end_loop_read:
+while i_1<=end_loop_read:
     try:
-        i = i + 1
         data = rtlsUtil.aoa_results_queue.get(block=True, timeout=0.5)
         i_1 = i_1 + 1
-        i_1_list.append(i_1)
-        angle_arr_1.append(data['payload'].angle)
-        angle_arr1__to_mat.append(data['payload'].angle)
-        rssi_arr_1.append(data['payload'].rssi)
-        rssi_arr_1_to_mat.append(data['payload'].rssi)
         channel1_list.append(data['payload'].channel)
-        plt.plot(i_1_list,angle_arr_1,color = 'blue')
-        plt.pause(1/460800)
-        if i_1%100==0:
-            plt.clf()
-            i_1_list = []
-            angle_arr_1 = []
-            rssi_arr_1 = []
+        if i_1>1 and channel1_list[i_1-1]==channel1_list[1]:
+            i_chan = i_chan + 1
+            i_chan_list.append(i_chan)
+            angle_arr_1.append(data['payload'].angle)
+            rssi_arr_1.append(data['payload'].rssi)
+            plt.plot(i_chan_list,angle_arr_1,color = 'blue')
+            plt.pause(1/460800)
+            if i_chan > 100:
+                plt.xlim(i_chan_list[i_chan-100],_chan_list[i_chan-1])
     except queue.Empty:
         continue
 
-sio.savemat('Ant1_one_antennas.mat', {'alpha':angle_arr1__to_mat, 'rssi_1':rssi_arr_1_to_mat, 'channel1':channel1_list})
+sio.savemat('Ant1_one_antennas.mat', {'alpha':angle_arr_1, 'rssi_1':rssi_arr_1, 'channel1':channel1_list[1]})
 rtlsUtil.aoa_stop()
 if rtlsUtil.ble_connected:
     rtlsUtil.ble_disconnect()
